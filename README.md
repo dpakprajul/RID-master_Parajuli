@@ -66,7 +66,7 @@ Master Thesis: Deep Learning for Photovoltaic Potential - Evaluation of an Alter
 Approach for Roof Segmentation and Orientation Determination
 
 ## Supervisors
-Prof. Dr. rer. nat. Christine Preisach, Hochschule Karlsruhe
+Prof. Dr. rer. nat. Christine Preisach, Hochschule Karlsruhe,
 Msc. Sebastian Krapf, TUM
 
 ## Contributors
