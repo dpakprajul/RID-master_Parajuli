@@ -1,0 +1,14 @@
+data/
+images_roof_centered_geotiff/
+plots/
+predictions/
+results/
+raster_data_annotation_experiment/
+segmentation_model_data/
+venv/
+*.h5
+.spyproject/
+__pycache__/
+*.png
+*.whl
+
