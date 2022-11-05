@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Sep 20 02:18:22 2022
-
+This script calculates the confusion matrix between the azimuth/direction of the ground truth and the predicted image
+algorithm used: nearest gutter algorithm (NGA)
 @author: binda
 """
 
@@ -56,7 +57,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-"""
+
 def remove_bg(input_file, output_file):
     if not os.path.isdir(output_file):
         os.mkdir(output_file)
@@ -84,10 +85,12 @@ def remove_bg(input_file, output_file):
         cv2.imwrite(output_path, img_gray)
        
     return
+
+"""
 in_put = "D:\\RID-master\\RID-master\\data\\masks_segments_gable"
 output = "D:\\RID-master\\RID-master\\segmentation_model_data\\masks_superstructures_reviewed"   
 remove_bg(in_put, output)    
-    
+ """   
 
 
 
@@ -126,7 +129,7 @@ def create_geotiff(input, image, output):
         save_as_geotif(bbox_gen, image_gen, output_path)
 
     return
-"""
+
 """
 def create_geotiff(input, image, output):
     if not os.path.isdir(output):
@@ -172,21 +175,9 @@ created_geotiff = create_geotiff(
     DIR_CREATE_AND_DELETE
 )
 """
-def azimuth_to_label_class(az, label_classes):
-     label_classes = label_classes[:-1]
-     if np.isnan(az):
-         az_class = "flat"
-     else:
-         surplus_angle = 360 / len(label_classes) / 2
-         az = az + 180 + surplus_angle
-         if az > 360:
-             az -= 360
-         az_id = int(np.ceil(az / (360 / len(label_classes))) - 1)
-         az_class = label_classes[az_id]
-     return az_class
- 
+
 def segment_generation2(df_label1, df_label2, mask_id1):
-    
+    '''This function takes the dataframe of the labels and the mask id and returns the azimuth and direction of the segment'''
     df_label1 = gpd.GeoDataFrame(df_label1, geometry='geometry')
     #df_label1 = df_label1.explode()
     mrrs = df_label1.geometry
@@ -510,6 +501,7 @@ def orientation():
     print(confusion_matrix(list1_append, list2_append, normalize="true").diagonal())
     
     """
+    #remove comment if you want to store the list in a txt file
     with open("C:\\Users\\binda\\Downloads\\check\\azimuth_list\\list1.txt", "w") as output:
         output.write(str(list1_append))
     with open("C:\\Users\\binda\\Downloads\\check\\azimuth_list\\list2.txt", "w") as output:

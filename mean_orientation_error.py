@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Oct  4 14:06:51 2022
-
+Script that calculates the mean orientation error
 @author: binda
 """
 
