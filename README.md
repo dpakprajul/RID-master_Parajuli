@@ -70,6 +70,7 @@ Prof. Dr. rer. nat. Christine Preisach, Hochschule Karlsruhe,
 Msc. Sebastian Krapf, TUM
 
 ## Contributors
+Deepak Parajuli,
 Sebastian Krapf
 Fabian Netzler, 
 Lukas Bogenrieder, 
