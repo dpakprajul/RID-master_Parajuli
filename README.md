@@ -71,7 +71,7 @@ Msc. Sebastian Krapf, TUM
 
 ## Contributors
 Deepak Parajuli,
-Sebastian Krapf
+Sebastian Krapf,
 Fabian Netzler, 
 Lukas Bogenrieder, 
 Nils Kemmerzell
