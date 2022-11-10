@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep 20 01:52:40 2022
+Created on Tue Sep 20 00:11:49 2022
 
 @author: binda
+The script is uses a longest line algorithm to find the correct gutter line for each segment.
 """
-
 from utils \
     import get_image_gdf_in_directory, geotif_to_png
 #from azimuth_try import azimuth, area
@@ -106,155 +106,78 @@ def segment_azimuth(gutters_list, segments_list):
 
 def segment_generation(df_label1, mask_id1):
     
-    df_label = gpd.GeoDataFrame(df_label1, geometry='geometry')
-    mrrs = df_label.geometry
+    df_label1 = gpd.GeoDataFrame(df_label1, geometry='geometry')
+    #df_label1 = df_label1.explode()
+    mrrs = df_label1.geometry
     segments = []
     direction_list = []
-   
-
-   
-    label_classes = list(mrrs.geometry) 
-   #label_classes = list(mrrsp.geometry)
-    segments = []
     azimuth_list = []
-   #geoser = []
-   
-   
-   
-    for i, mrr in enumerate(mrrs.iloc):
-       min_rot_each = mrrs[i].minimum_rotated_rectangle
-       boundary = min_rot_each.boundary
-       try:
-           coords = [c for c in boundary.coords]
-   # block raising an exception
-       except:
-           pass # doing nothing on exception
-       segments = [shapely.geometry.LineString([a,b]) for a,b in zip(coords, coords[1:])]
-       geoseries_shapely = gpd.GeoSeries(segments, crs=4326)
-       
-       #geoser.append(segments)
-       #save_directory = "C:\\Users\\binda\\Downloads\\check\\segment"+ "\\" + str(i) + ".shp"
-       #geoseries_shapely.to_file(save_directory)
-       #save_directory = "C:\\Users\\binda\\Downloads\\check\\segment"+ "\\" + str(i) + ".shp"
-       #geoseries_shapely.to_file(save_directory)
-       segment_lists = []
-       for seg, segment_list in enumerate(segments):
-           segment_list = segments[seg].length
-           segment_lists.append(segment_list)
-       geoseries_shapely['length'] = segment_lists
-       g = geoseries_shapely
-       g0 =g[0].centroid        
-       g1=g[1].centroid      
-       g2=g[2].centroid       
-       g3 = g[3].centroid  
-       #g_shapely = gpd.GeoSeries([g[0],g[1],g[2],g[3],mrrs[21],mrrs[35],mrrs[37],mrrs[38],mrrs[40],g3], crs =31468)  
-       #g_shapely.plot() 
+    #geoser = []
+    
 
-       centroid_all = []
-       distance_all_g0 = []
-       ##for first line
-       #g[0]
-       for id1, segments in enumerate(label_classes):
-           centroid_one = label_classes[id1]
-           centroid_all.append(centroid_one) 
-           p1, p2 = shapely.ops.nearest_points(centroid_all[id1],g0)
-           distance_between_points = p1.distance(g0)
-           #p1, p2 = nearest_points(poly, point)
-           distance_all_g0.append(distance_between_points)
-           
-       filtered = filter(lambda x: x != 0,distance_all_g0)
-       sort = sorted(filtered)
-       list_distance = sort[0:20]
-       sort_distance_min = min(list_distance)
-       #sort_distance_min
-       #distance_all_g1 = []
-       #for i, segments in enumerate(label_classes):
-           #centroid_one = label_classes[i].centroid
-           #centroid_all.append(centroid_one)
-           #distance_between_points = g1.distance(centroid_all[i])
-           #distance_all_g1.append(distance_between_points)
-
-       #sort1 = sorted(distance_all_g1)
-       #list_distance1 = sort1[0:20]
-
-       #sort_distance_min1 = min(list_distance1)
-       distance_all_g1 = []
-       for id2, segments in enumerate(label_classes):
-           centroid_one = label_classes[id2]
-           centroid_all.append(centroid_one) 
-           p1, p2 = shapely.ops.nearest_points(centroid_all[id2],g1)
-         
-           distance_between_points = p1.distance(g1)
-           #p1, p2 = nearest_points(poly, point)
-           distance_all_g1.append(distance_between_points)
-           #print(distance_between_points)
-       filtered = filter(lambda x: x != 0,distance_all_g1)
-       sort = sorted(filtered)
-       list_distance = sort[0:20]
-       sort_distance_min1 = min(list_distance)
-
-       distance_all_g2 = []
-       for id3, segments in enumerate(label_classes):
-           centroid_one = label_classes[id3]
-           centroid_all.append(centroid_one) 
-           p1, p2 = shapely.ops.nearest_points(centroid_all[id3],g2)
-           
-           distance_between_points = p1.distance(g2)
-           #p1, p2 = nearest_points(poly, point)
-           distance_all_g2.append(distance_between_points)
-           #print(distance_between_points)
-       filtered = filter(lambda x: x != 0,distance_all_g2)
-       sort = sorted(filtered)
-       list_distance = sort[0:20]
-       sort_distance_min2 = min(list_distance)
-
-
-
-       distance_all_g3 = []
-       for id4, segments in enumerate(label_classes):
-           centroid_one = label_classes[id4]
-           centroid_all.append(centroid_one) 
-           p1, p2 = shapely.ops.nearest_points(centroid_all[id4],g3)
-          
-           distance_between_points = p1.distance(g3)
-           #p1, p2 = nearest_points(poly, point)
-           distance_all_g3.append(distance_between_points)
-           #print(distance_between_points)
-       filtered = filter(lambda x: x != 0,distance_all_g3)
-       sort = sorted(filtered)
-       list_distance = sort[0:20]
-       sort_distance_min3 = min(list_distance)
-
-       distances = [sort_distance_min, sort_distance_min1, sort_distance_min2, sort_distance_min3]
-     
-       if distances[0]==max(distances):
-           gutter = g[0]
-       elif distances[1]==max(distances):
-           gutter = g[1]
-       elif distances[2]==max(distances):
-           gutter = g[2]
-       else:
-           gutter = g[3]
-           
-
-
-       gutter_shapely = gpd.GeoSeries(gutter, crs=4326)
-       #save_directory_gutter = "C:\\Users\\binda\\Downloads\\check\\gutter"+ "\\" + str(i) + ".shp"
-       #gutter_shapely.to_file(save_directory_gutter)
-       
-       azimuth = segment_azimuth(gutter_shapely, g)
-       az = azimuth[0]
-       label_classes_segments_18 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                                   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'flat']
-
+    label_classes = list(mrrs.geometry) #it gives the list of all polygon
+    
+    
+    for i, mrr in enumerate(mrrs.iloc): 
+        min_rot_each = mrrs[i].minimum_rotated_rectangle
+        min_rot_each1 = gpd.GeoSeries(min_rot_each, crs= 4326)
+        #save_directory = "C:\\Users\\binda\\Downloads\\check\\mrr"+ "\\" + str(mask_id1)+ "_" + str(i) + ".shp"
+        #min_rot_each1.to_file(save_directory)
+        
+        boundary = min_rot_each.boundary
+        try:
+            coords = [c for c in boundary.coords]
+    # block raising an exception
+        except:
+            pass # doing nothing on exception
+        
+        segments = [shapely.geometry.LineString([a,b]) for a,b in zip(coords, coords[1:])]
+        geoseries_shapely = gpd.GeoSeries(segments, crs=4326)
+        
+        #save_directory = "C:\\Users\\binda\\Downloads\\check\\segment"+ "\\" + str(mask_id1)+ "_" + str(i) + ".shp"
+        #geoseries_shapely.to_file(save_directory)
+        
+        segment_lists = []
+        for seg, segment_list in enumerate(segments):
+            segment_list = segments[seg].length
+            segment_lists.append(segment_list)
+        #segment_lists
+        geoseries_shapely['length'] = segment_lists
+        #g = geoseries_shapely
+        
+        def find_longest_line(coordinates1):
+            #make a list of the coordinates of the polygon
+            coordinates = list(coordinates1)
+            #make a list of the lenghts of the segments of the polygon
+            lengths = [LineString([coordinates[i], coordinates[i+1]]).length for i in range(len(coordinates)-1)]
+            #find the index of the longest segment
+            index = np.argmax(lengths)
+            #make a line from the coordinates of the longest segment
+            line = LineString([coordinates[index], coordinates[index+1]])
+            #return the line
+            return line
+        
+        gutter = find_longest_line(coords)
       
-       direction = azimuth_to_label_class(az, label_classes_segments_18)
-       azimuth_list.append(az)
-       direction_list.append(direction)
+            
+
+
+        gutter_shapely = gpd.GeoSeries(gutter, crs=4326)
+        
+        #save_directory_gutter = "C:\\Users\\binda\\Downloads\\check\\gutter"+ "\\" + str(mask_id1)+ "_" + str(i) + ".shp"
+        #gutter_shapely.to_file(save_directory_gutter)
+        
+        azimuth = segment_azimuth(gutter_shapely, geoseries_shapely)
+        az = azimuth[0]
+        
+        label_classes_segments_18 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                                    'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'flat']
+        
+        azimuth_list.append(az)
+
        
-       #for i, m in enumerate(geoser):
-           ##save_directory = "C:\\Users\\binda\\Downloads\\check\\segment"+ "\\" + str(i) + ".shp"
-           #m[i].to_file(save_directory)
+        direction = azimuth_to_label_class(az, label_classes_segments_18)
+        direction_list.append(direction)
         
     return direction_list, azimuth_list
 
@@ -315,7 +238,7 @@ def segment_generation1(df_label1, df_label2, mask_id1):
             centroid_one = label_classes[id1]
             centroid_all.append(centroid_one) 
             p1, p2 = shapely.ops.nearest_points(centroid_all[id1],g0)
-            distance_between_points = p1.distance(g[0])
+            distance_between_points = p1.distance(g0)
             #p1, p2 = nearest_points(poly, point)
             distance_all_g0.append(distance_between_points)
         #filtered = filter(lambda x: x != 0,distance_all_g0)
@@ -329,7 +252,7 @@ def segment_generation1(df_label1, df_label2, mask_id1):
             centroid_one = label_classes[id2]
             centroid_all.append(centroid_one) 
             p1, p2 = shapely.ops.nearest_points(centroid_all[id2],g1)
-            distance_between_points = p1.distance(g[1])
+            distance_between_points = p1.distance(g1)
             #p1, p2 = nearest_points(poly, point)
             distance_all_g1.append(distance_between_points)
             
@@ -343,7 +266,7 @@ def segment_generation1(df_label1, df_label2, mask_id1):
             centroid_one = label_classes[id3]
             centroid_all.append(centroid_one) 
             p1, p2 = shapely.ops.nearest_points(centroid_all[id3],g2)
-            distance_between_points = p1.distance(g[2])
+            distance_between_points = p1.distance(g2)
             #p1, p2 = nearest_points(poly, point)
             distance_all_g2.append(distance_between_points)
             
@@ -359,7 +282,7 @@ def segment_generation1(df_label1, df_label2, mask_id1):
             centroid_one = label_classes[id4]
             centroid_all.append(centroid_one) 
             p1, p2 = shapely.ops.nearest_points(centroid_all[id4],g3)
-            distance_between_points = p1.distance(g[3])
+            distance_between_points = p1.distance(g3)
             #p1, p2 = nearest_points(poly, point)
             distance_all_g3.append(distance_between_points)
             
@@ -583,10 +506,10 @@ def orientation():
         
         dir_lists.append(dir_list)
         dir_lists1.append(dir_list1)
-        gdf_labels['direction']= dir_list
-        gdf_labels3['direction'] = dir_list1
-        gdf_labels['azimuth']= az_list
-        gdf_labels3['azimuth'] = az_list1
+        gdf_labels['direction']= dir_list1
+        gdf_labels3['direction'] = dir_list
+        gdf_labels['azimuth']= az_list1
+        gdf_labels3['azimuth'] = az_list
         """
         
         try:

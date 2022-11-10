@@ -5,13 +5,6 @@ Created on Tue Aug 23 14:42:41 2022
 @author: binda
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 23 13:50:35 2022
-
-@author: binda
-"""
-
 
 import geopandas as gpd
 import heapq

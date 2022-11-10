@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Sep 12 15:54:12 2022
-
+This was 
 @author: binda
 """
 

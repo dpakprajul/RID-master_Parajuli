@@ -41,6 +41,8 @@ from utils \
 from visualization import visualization_annotation_agreement
 from pv_potential import pv_potential_analysis
 from mean_orientation_error import orientation_error
+from nearest_gutter_algorithm import remove_bg, create_geotiff
+
 
 
 ### Define paths
@@ -83,9 +85,9 @@ from definitions import \
     OUTPUT_FOLDER_ADD, \
     LABEL_CLASSES_ROOFLINE, \
     DIR_TRAIN_FOLDER3, \
-    DIR_TEST_FOLDER3, \
+    DIR_TEST_FOLDER3,DIR_TRAIN_M_FOLDER3, DIR_TEST_M_FOLDER3, \
     label_classes_superstructures_annotation_experiment1, \
-    DIR_PREDICTIONS1
+    DIR_PREDICTIONS1, DIR_IMAGES_GEOTIFF_TRASH, DIR_CREATE_AND_DELETE
 
 ### Define labeling classes
 from definitions import \
@@ -97,11 +99,6 @@ from definitions import \
     LABEL_CLASSES_PV_AREAS
     
 
-
-#model = model_training(MODEL_TYPE, BACKBONE, LABEL_CLASSES_SUPERSTRUCTURES1, DIR_SEGMENTATION_MODEL_DATA, DIR_MASKS_SEGMENTS_TRY, DIR_RESULTS_TRAINING, IMAGE_SHAPE)    
-#pv_potential_analysis()
-
-
 ########################################################################################################################
 ### Import images
 ########################################################################################################################
@@ -109,7 +106,6 @@ from definitions import \
 geotif_to_png(DIR_IMAGES_GEOTIFF, DIR_IMAGES_PNG)
 
 # Get ids of all images in geotiff image folder
-
 image_id_list = [id[:-4] for id in os.listdir(DIR_IMAGES_GEOTIFF) if id[-4:] == '.tif']
 gdf_images = get_image_gdf_in_directory(DIR_IMAGES_GEOTIFF)
 
@@ -120,12 +116,11 @@ gdf_test_labels = import_vector_labels(
     'superstructures',
     LABEL_CLASSES_SUPERSTRUCTURES
 )
-"""
+
 
 ########################################################################################################################
 ### 1) Create roof superstructure masks from vector labels
 ########################################################################################################################
-"""
 gdf_labels_superstructure = vector_labels_to_masks(
     FILE_VECTOR_LABELS_SUPERSTRUCTURES,
     DIR_MASKS_SUPERSTRUCTURES,
@@ -133,19 +128,6 @@ gdf_labels_superstructure = vector_labels_to_masks(
     LABEL_CLASSES_SUPERSTRUCTURES,
     gdf_images,
     filter=False
-)
-
-"""
-
-"""
-train_val_test_split(
-    gdf_test_labels,
-    gdf_images,
-    VAL_DATA_CENTER_POINTS,
-    LABEL_CLASSES_SUPERSTRUCTURES,
-    DIR_IMAGES_PNG,
-    DIR_MASKS_SUPERSTRUCTURES,
-    DIR_SEGMENTATION_MODEL_DATA
 )
 
 
@@ -172,7 +154,7 @@ gdf_labels_try = vector_labels_to_masks_try(
 """
 
 """
-#deepak coded: its not working copy it from vector_labels_to_mask_gutter
+#converts the gable (csv data) into a mask label
 gdf_labels_segments_gable = vector_labels_to_masks_gable(
     FILE_VECTOR_LABELS_SEGMENTS,
     DIR_MASKS_SEGMENTS_GABLE,
@@ -182,8 +164,7 @@ gdf_labels_segments_gable = vector_labels_to_masks_gable(
     filter=False
 )
 
-"""
-"""
+#converts the gutter (csv data) into a mask label
 gdf_labels_segments_gutter = vector_labels_to_masks_gutter(
     FILE_VECTOR_LABELS_PV_AREAS,
     DIR_MASKS_SEGMENTS_GUTTER,
@@ -193,6 +174,7 @@ gdf_labels_segments_gutter = vector_labels_to_masks_gutter(
     filter=False
 )
 
+#converts the roofline (csv data) into a mask label
 gdf_labels_roofline = vector_labels_to_masks_roofline(
     FILE_VECTOR_LABELS_SEGMENTS,
     DIR_MASKS_SEGMENTS_ROOFLINE,
@@ -201,22 +183,25 @@ gdf_labels_roofline = vector_labels_to_masks_roofline(
     gdf_images,
     filter=False
     )
-"""
 
-#commented for debugging purpose
-#train_val_test_split(
-    #gdf_test_labels,
-    #gdf_images,
-    #VAL_DATA_CENTER_POINTS,
-    #LABEL_CLASSES_SEGMENTS,
-    #DIR_IMAGES_PNG,
-    #DIR_MASKS_SEGMENTS,
-    #DIR_SEGMENTATION_MODEL_DATA
-#)
+#########################################
+### 3) splitting of the train_validation data so that there is no any overlap between the train, validation
+#and test dataset
+#########################################
+train_val_test_split(
+    gdf_test_labels,
+    gdf_images,
+    VAL_DATA_CENTER_POINTS,
+    LABEL_CLASSES_SEGMENTS,
+    DIR_IMAGES_PNG,
+    DIR_MASKS_SEGMENTS,
+    DIR_SEGMENTATION_MODEL_DATA
+)
 
 
-#add two images and save i"t in a p"ath
-""""
+#add two images and save it into a folder for generating different kind of masks
+#eg: combination of rooflines, roof, gutters or gables for different study purpose
+### Step 4) Ignore it if you already have required mask of your purpose
 add_images(
     DIR_MASKS_SEGMENTS_TRY,
     DIR_MASKS_SEGMENTS_ROOFLINE,
@@ -225,62 +210,55 @@ add_images(
     )
 
 """
-#for shapefile creation
-#input_output(
-    #DIR_ROOFLINE_TESTED,
-   # SHP_OUTPUT_ROOFLINE
-    #)
-"""
-
-#augment_mask(
-    #DIR_MASKS_SEGMENTS_ROOFLINE_ADD,
-   # OUTPUT_AUGMENT_ADD
-    #)
+#commented augment_mask as it is not necessary for our purpose
+augment_mask(
+    DIR_MASKS_SEGMENTS_ROOFLINE_ADD,
+    OUTPUT_AUGMENT_ADD
+    )
 
 #for mixed image
-#augment_mask(
-    #OUTPUT_AUGMENT_ROOF_GABLE,
-    #DIR_ROOFL_GABLE
-    #)
-#
+augment_mask(
+    OUTPUT_AUGMENT_ROOF_GABLE,
+    DIR_ROOFL_GABLE
+    )
+"""
+### Step 5) 
+#copy the the image files from the numbers using csv file or text file created in step 3
+#example: if the csv/txt file has values: 1,2,3,4,5 this script will copy the images with maskid
+#1, 2, 3, 4, 5 from the image folder to another empty folder
+train_image(
+    CSV_FILE_TRAIN,
+    DIR_TRAIN_FOLDER3
+    )
 
-#train_image(
-    #CSV_FILE_TRAIN,
-    #DIR_TRAIN_FOLDER3
-    #)
+test_image(
+    CSV_FILE_TEST,
+    DIR_TEST_FOLDER3
+    )
 
-#test_image(
-    #CSV_FILE_TEST,
-    #DIR_TEST_FOLDER3
-    #)
+train_mask(
+    CSV_FILE_TRAIN,
+    DIR_TRAIN_M_FOLDER3
+    )
 
-#train_mask(
-    #CSV_FILE_TRAIN,
-    #DIR_TRAIN_M_FOLDER3
-    #)
+test_mask(
+    CSV_FILE_TEST,
+    DIR_TEST_M_FOLDER3
+    )
 
-#test_mask(
-    #CSV_FILE_TEST,
-    #DIR_TEST_M_FOLDER3
-    #)
-
-#datasetsplit
-
-
-
+"""
 ########################################################################################################################
-### 3) Analyze the dataset
-##removed for debbuging purpose
+### Step 6) Analyze the dataset
+##removed for debbuging purpose and not important in our study
 ########################################################################################################################
 # calculate the pixel share of the classes for superstructure and segment dataset
-#class_share_percent_superstructures = mask_pixel_per_image(
-    #DIR_MASKS_SUPERSTRUCTURES,
-    #LABEL_CLASSES_SUPERSTRUCTURES,
-    #IMAGE_SHAPE
-#)
+class_share_percent_superstructures = mask_pixel_per_image(
+    DIR_MASKS_SUPERSTRUCTURES,
+    LABEL_CLASSES_SUPERSTRUCTURES,
+    IMAGE_SHAPE
+)
 
-"""
-"""
+
 class_share_percent_segments = mask_pixel_per_image(
     DIR_MASKS_SEGMENTS,
     LABEL_CLASSES_SEGMENTS,
@@ -295,20 +273,7 @@ class_share_percent_superstructures = mask_pixel_per_image(
 """
 
 """
-gdf_labels_superstructure = import_vector_labels(
-    FILE_VECTOR_LABELS_SUPERSTRUCTURES,
-    'superstructures',
-    LABEL_CLASSES_SUPERSTRUCTURES1
-)
-gdf_labels_segments = import_vector_labels(
-    FILE_VECTOR_LABELS_SEGMENTS,
-    'segments',
-    LABEL_CLASSES_SEGMENTS
-)
-
-"""
-
-"""
+### step 7)
 # calculate the number of labels and the labeled area for superstructure and segment dataset
 label_class_count_superstructures, label_area_count_superstructures = class_distribution(
     gdf_labels_superstructure, LABEL_CLASSES_SUPERSTRUCTURES
@@ -317,21 +282,19 @@ label_class_count_superstructures, label_area_count_superstructures = class_dist
 label_class_count_segments, label_area_count_segments = class_distribution(
     gdf_labels_segments, LABEL_CLASSES_SEGMENTS
 )
-"""
+
 
 #visualize_class_distribution(LABEL_CLASSES_SUPERSTRUCTURES)
 
 
 
-"""
 ########################################################################################################################
-### 4) Evaluate annotation experiment and visualize results
+### 8) Evaluate annotation experiment and visualize results
 ########################################################################################################################
 # Evaluation annotation agreement of superstructure labels. This takes long time to compute.
 # Check if results of evaluation are already saved as pkl file.
 # Important: change the pkl filename when evaluating multiple models!
-"""
-"""
+
 if os.path.isfile('data\\res_annotation_experiment.pkl'):
     with open('data\\res_annotation_experiment.pkl', 'rb') as f:
         [CM_AE_all, CM_AE_list, CM_AE_class_agnostic_all, CM_AE_class_agnostic_list] = pickle.load(f)
@@ -365,11 +328,13 @@ visualize_annotation_experiment_box_plot(df_IoU_AE, df_IoU_AE_class_agnostic, LA
 CM_AE_all_normalized = normalize_confusion_matrix_by_rows(CM_AE_all)
 visualize_annotation_experiment_confusion_matrix(CM_AE_all_normalized, LABEL_CLASSES_SUPERSTRUCTURES.values())
 """
+
 # Evaluation annotation agreement of roof outline. This takes long time to compute
 # Check if results of evaluation are already saved as pkl file.
 # Important: change the pkl filename when evaluating multiple models!
 
 """
+#not important for this study
 if os.path.isfile('data\\res_annotation_experiment_pv_areas.pkl'):
     with open('data\\res_annotation_experiment_pv_areas.pkl', 'rb') as f:
         [CM_AE_pv_area_all, CM_AE_pv_area_list] = pickle.load(f)
@@ -383,13 +348,13 @@ else:
         )
 
 """
-orientation_error()
+
 # ########################################################################################################################
 # ### 5) Train model for semantic segmentation of superstructure - Make sure to use a GPU
+###carry out model_training in GPU and get the .h5 model and store it inside DIR_RESULTS_TRAINING
 # ########################################################################################################################
-#model = model_training(MODEL_TYPE, BACKBONE, LABEL_CLASSES_SUPERSTRUCTURES, DIR_SEGMENTATION_MODEL_DATA, DIR_MASKS_SEGMENTS_TRY, DIR_RESULTS_TRAINING, IMAGE_SHAPE)
-
-#model.load_weights(DIR_RESULTS_TRAINING + '/' + MODEL_NAME + '.h5', by_name=True)
+model = model_training(MODEL_TYPE, BACKBONE, LABEL_CLASSES_SUPERSTRUCTURES, DIR_SEGMENTATION_MODEL_DATA, DIR_MASKS_SEGMENTS_TRY, DIR_RESULTS_TRAINING, IMAGE_SHAPE)
+model.load_weights(DIR_RESULTS_TRAINING + '/' + MODEL_NAME + '.h5', by_name=True)
 ########################################################################################################################
 ### 6) Evaluate model and visualize results
 ########################################################################################################################
@@ -398,24 +363,24 @@ DIR_SEGMENTATION_MODEL_DATA = DIR_SEGMENTATION_MODEL_DATA # + '_3' # use validat
 
 # load model and datasets
 model, preprocess_input = model_load(MODEL_NAME, MODEL_TYPE, BACKBONE, LABEL_CLASSES_SUPERSTRUCTURES1)
-#model.summary()
-
-
+model.summary()  #get summary of the model
 
 train_dataset, valid_dataset, test_dataset = get_datasets(DIR_SEGMENTATION_MODEL_DATA, DIR_MASK_FILES, DATA_VERSION,
                                                preprocess_input, label_classes_superstructures_annotation_experiment1, resize=None)
 #LABEL_CLASSES_SUPERSTRUCTURES1
-
-
+#add the test txt file that is created in step 3) into the directory filenames_annotation_experiment
 dir_mask_files_test = os.path.join(DIR_SEGMENTATION_MODEL_DATA, 'filenames_annotation_experiment')
-"""
+
+#add all the the original image and masked image that is created from txt file in step 5) into a folder 
+#D:\RID-master\RID-master\raster_data_annotation_experiment in test and test_masks
+#use the same LABEL_CLASSES values which is used in the training of the model. Ex: use 2 or 3 classes according to requirement
 test_dataset = get_test_dataset(DATA_DIR_ANNOTATION_EXPERIMENT, dir_mask_files_test, 'annotation_experiment',
                                 preprocess_input,
                                 LABEL_CLASSES_SUPERSTRUCTURES1.values())
 
 filter_dataset = create_filter_dataset(DATA_DIR_ANNOTATION_EXPERIMENT, dir_mask_files_test, 'annotation_experiment',
                                        LABEL_CLASSES_SUPERSTRUCTURES1, preprocess_input)
-"""
+
 filter_dataset = None
 # Evaluation of model.  This takes long time top compute on CPU.
 # Check if results of evaluation are already saved as pkl file.
@@ -446,7 +411,7 @@ with open(results_path, 'rb') as f:
 CM_all_normalized = normalize_confusion_matrix_by_rows(CM_all)
 visualize_prediction_confusion_matrix(CM_all_normalized, LABEL_CLASSES_SUPERSTRUCTURES1.values())
 
-# visualized the class specific mean IoUs as box plots and add other IoUs "a"s compar""ison
+# not important in this section
 """"
 visualize_prediction_mean_IoUs_as_box_plots(
     df_IoUs,
@@ -475,9 +440,28 @@ visualize_top_median_bottom_predictions_and_ground_truth(
 ########################################################################################################################
 ### 7) Conduct PV Potential Assessment
 ########################################################################################################################
-# calculate predictions on the validation dataset and save the masks
+# 7) calculate predictions on the validation dataset and save the masks
 save_prediction_masks(model, test_dataset, LABEL_CLASSES_SUPERSTRUCTURES1, DIR_PREDICTIONS1)
+"""
 # use prediction masks to calculate pv potential for 6 use cases
 pv_potential_analysis()
+"""
+###Step 8) Postprocess the image according to requirement. This includes the mapping of the pixels and 
+#replacing pixels using opencv
+#input is the image received from save_prediction. Change the directory accordingly
+in_put = "D:\\RID-master\\RID-master\\data\\masks_segments_gable"
+output = "D:\\RID-master\\RID-master\\segmentation_model_data\\masks_superstructures_reviewed"   
+remove_bg(in_put, output) 
 
 
+###step 9) Create a geotiff image. The processed image in the step 8) is not georeferenced image and hence need to georeferenced
+#where the 1st parameter is the georeferenced original image, 2nd is the mask from step 8) and 3rd parameter is the output folder where the 
+#georeferenced mask is stored
+create_geotiff(
+    DIR_IMAGES_GEOTIFF_TRASH,
+    DIR_PREDICTIONS1,
+    DIR_CREATE_AND_DELETE
+)
+
+#Further carry out nearest_gutter_algorithm.py script for further image processing of the predicted masks 
+#refer readme file for further details
