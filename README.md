@@ -4,6 +4,7 @@ This project is the code used for completing the master's thesis. The project de
 This repository includes datasets for semantic segmentation of roof segments and rooflines (gables and gutters). The code includes the data preparation, training, and comparison of the different algorithms adapted for getting the correct gutter segment. The code also includes the evaluation of the different algorithms.
  
 ## How to get started
+#### Data are not included because of privacy policy
 - Clone the repository
 - Install the requirements
 - Download the datasets
